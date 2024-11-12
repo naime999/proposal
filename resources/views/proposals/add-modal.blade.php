@@ -13,13 +13,13 @@
                     {{-- Select client --}}
                     <div class="col-md-12 mb-3">
                         <label>Client <span style="color:red;">*</span></label>
-                        <select class="form-control form-control-user @error('user_id') is-invalid @enderror" name="user_id">
-                            <option selected disabled>Select a client</option>
+                        <select class="form-control form-control-user @error('client_id') is-invalid @enderror" name="client_id">
+                            <option value="" selected disabled>Select a client</option>
                             @foreach ($clients as $client)
-                                <option value="{{ $client->id }}">{{ $client->name }}</option>
+                                <option value="{{ $client->id }}">{{ $client->first_name . ' ' . $client->last_name }}</option>
                             @endforeach
                         </select>
-                        @error('user_id')
+                        @error('client_id')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>

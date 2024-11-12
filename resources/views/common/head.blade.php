@@ -9,7 +9,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} | @yield('title')</title>
+    <title>{{ getSetting('app-name')->value }} | @yield('title')</title>
 
     {{-- ICON --}}
     <link rel="shortcut icon" type="image/jpg" href="{{ asset('images/icon.png') }}"/>
@@ -26,7 +26,6 @@
     <!-- Styles for this template-->
     <link href="{{asset('css/app.css')}}" rel="stylesheet">
     <link href="{{asset('admin/css/sb-admin-2.min.css')}}" rel="stylesheet">
-    <link href="{{asset('admin/vendor/dataTables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
     @yield('css')
     <style>
         .loader-overlay {

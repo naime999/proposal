@@ -12,7 +12,7 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        @if (request()->is('users/proposal/create') != true)
+        @if (!request()->routeIs('users.proposal.show'))
         @include('common.sidebar')
         @endif
         <!-- End of Sidebar -->
@@ -24,7 +24,7 @@
             <div id="content">
 
                 <!-- Topbar -->
-                @if (request()->is('users/proposal/create') != true)
+                @if (!request()->routeIs('users.proposal.show'))
                 @include('common.header')
                 @else
                 @include('common.builder')
@@ -39,7 +39,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            @if (request()->is('users/proposal/create') != true)
+            @if (!request()->routeIs('users.proposal.show'))
             @include('common.footer')
             @endif
             <!-- End of Footer -->
@@ -64,7 +64,6 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{asset('admin/js/sb-admin-2.min.js')}}"></script>
-    <script src="{{asset('admin/vendor/dataTables/dataTables.bootstrap4.min.js')}}"></script>
     <script>
         let loader = new lv();
         loader.initLoaderAll();

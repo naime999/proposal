@@ -8,6 +8,7 @@ use App\Models\ProposalSection;
 use App\Models\ProposalSignature;
 use App\Exports\UsersExport;
 use App\Imports\UsersImport;
+use App\Libraries\CommonFunction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
+use Yajra\DataTables\Facades\DataTables;
+
+use App\Mail\ExampleMail;
+use Illuminate\Support\Facades\Mail;
 
 class ProposalController extends Controller
 {
@@ -28,34 +33,100 @@ class ProposalController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index']]);
-        $this->middleware('permission:user-create', ['only' => ['create','store', 'updateStatus']]);
-        $this->middleware('permission:user-edit', ['only' => ['edit','update']]);
-        $this->middleware('permission:user-delete', ['only' => ['delete']]);
+        $this->middleware('permission:proposal-list|proposal-create|proposal-edit|proposal-delete', ['only' => ['index', 'getData']]);
+        $this->middleware('permission:proposal-show', ['only' => ['showProposal', 'loadData', 'getSection', 'getSignature']]);
+        $this->middleware('permission:proposal-create', ['only' => ['create', 'addSection']]);
+        $this->middleware('permission:proposal-edit', ['only' => ['edit', 'updateSection', 'updateData']]);
+        $this->middleware('permission:proposal-delete', ['only' => ['delete', 'deleteSection']]);
     }
 
-
-    /**
-     * List User
-     * @param Nill
-     * @return Array $user
-     * @author Shani Singh
-     */
     public function index()
     {
         $clients = User::where('role_id',3)->with('roles')->get();
         return view('proposals.index', compact('clients'));
     }
 
+    public function getData(Request $request)
+    {
+        if (!$request->ajax()) {
+            return 'Sorry! this is a request without proper way.';
+        }
+
+        try {
+            if(Auth()->user()->role_id == 3){
+                $list = Proposal::with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->where('client_id', Auth()->user()->id)->get();
+            }else{
+                $list = Proposal::with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->where('user_id', Auth()->user()->id)->get();
+            }
+            return DataTables::of($list)
+                ->editColumn('status', function ($list) {
+                    return CommonFunction::getProposalStatus($list->status);
+                })
+                ->editColumn('client', function ($list) {
+                    return $list->client->first_name." ".$list->client->last_name;
+                })
+                ->addColumn('action', function ($list) {
+                    // return "";
+                    return '<a href="javascript:;" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="text-primary ti ti-dots-vertical"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end m-0 p-0">
+                        <li><a href="javascript:;" class="dropdown-item py-2"><i class="fas fa-list pr-2"></i> Details</a></li>
+                        <div class="dropdown-divider m-0"></div>
+                        <li><a href="'.route('users.proposal.show', $list->slug).'" class="dropdown-item py-2 text-primary delete-record"><i class="fas fa-eye pr-2"></i> View</a></li>
+                    </ul>
+                    </div>';
+                })
+                ->addIndexColumn()
+                ->rawColumns(['status', 'image', 'action'])
+                ->make(true);
+        } catch (\Exception $e) {
+            // Session::flash('error', CommonFunction::showErrorPublic($e->getMessage()) . '[UC-1001]');
+            return Redirect::back();
+        }
+
+    }
+
     public function create(Request $request)
     {
-        $proposal = Proposal::where('id', 1)->with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->first();
+        // dd($request->all());
+
+        if(Auth()->user()->role_id == 3){
+            return redirect()->back()->with('error', 'No permission to create proposal.');
+        }
+
+        $this->validate($request, [
+            'client_id' => 'required',
+            'title' => 'required|max:500',
+            'status' => 'required',
+        ],[
+            "client_id.required" => "The client field is required",
+        ]);
+
+        $newProposal = new Proposal();
+
+        $creator = Auth()->user();
+        $newProposal->user_id = $creator->id;
+        $newProposal->client_id = $request->client_id;
+        $newProposal->title = $request->title;
+        $newProposal->slug = Str::slug($request->title, '-');
+        $newProposal->status = $request->status;
+
+        if($newProposal->save()){
+            return redirect()->route('users.proposal.show', ['slug' => $newProposal->slug]);
+        }else{
+            return redirect()->back()->with('error', 'Failed to save proposal.');
+        }
+    }
+
+    public function showProposal(Request $request)
+    {
+        $proposal = Proposal::where('slug', $request->slug)->with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->first();
         return view('proposals.add', compact('proposal'));
     }
 
     public function loadData(Request $request)
     {
-        $proposal = Proposal::where('id', $request->id)->with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->first();
+        $proposal = Proposal::where('slug', $request->slug)->with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->first();
         return $proposal;
     }
 
@@ -67,6 +138,13 @@ class ProposalController extends Controller
 
     public function addSection(Request $request)
     {
+        if(Auth()->user()->role_id == 3){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No permission to create section.'
+            ]);
+        }
+
         $this->validate($request, [
             'title' => 'required|max:500',
             'sub_title' => 'required|max:500',
@@ -293,6 +371,11 @@ class ProposalController extends Controller
             }
 
             if($newSignature->save()){
+                if($newSignature->type == 2){
+                    $proposal = Proposal::find($newSignature->proposal_id);
+                    $proposal->status = 2;
+                    $proposal->save();
+                }
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Proposal signature add successfully',
@@ -308,199 +391,51 @@ class ProposalController extends Controller
 
     }
 
-    /**
-     * Store User
-     * @param Request $request
-     * @return View Users
-     * @author Shani Singh
-     */
-    public function store(Request $request)
+
+    public function sendProposal(Request $request)
     {
-        // Validations
-        $request->validate([
-            'first_name'    => 'required',
-            'last_name'     => 'required',
-            'email'         => 'required|unique:users,email',
-            'mobile_number' => 'required|numeric|digits:10',
-            'role_id'       =>  'required|exists:roles,id',
-            'status'       =>  'required|numeric|in:0,1',
-        ]);
+        $proposal = Proposal::where('id',$request->id)->with('client')->first();
 
-        DB::beginTransaction();
-        try {
-
-            // Store Data
-            $user = User::create([
-                'first_name'    => $request->first_name,
-                'last_name'     => $request->last_name,
-                'email'         => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'role_id'       => $request->role_id,
-                'status'        => $request->status,
-                'password'      => Hash::make($request->first_name.'@'.$request->mobile_number)
+        // Check if the proposal exists
+        if (!$proposal) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Proposal not found.',
             ]);
-
-            // Delete Any Existing Role
-            DB::table('model_has_roles')->where('model_id',$user->id)->delete();
-
-            // Assign Role To User
-            $user->assignRole($user->role_id);
-
-            // Commit And Redirected To Listing
-            DB::commit();
-            return redirect()->route('users.index')->with('success','User Created Successfully.');
-
-        } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
-        }
-    }
-
-    /**
-     * Update Status Of User
-     * @param Integer $status
-     * @return List Page With Success
-     * @author Shani Singh
-     */
-    public function updateStatus($user_id, $status)
-    {
-        // Validation
-        $validate = Validator::make([
-            'user_id'   => $user_id,
-            'status'    => $status
-        ], [
-            'user_id'   =>  'required|exists:users,id',
-            'status'    =>  'required|in:0,1',
-        ]);
-
-        // If Validations Fails
-        if($validate->fails()){
-            return redirect()->route('users.index')->with('error', $validate->errors()->first());
         }
 
-        try {
-            DB::beginTransaction();
-
-            // Update Status
-            User::whereId($user_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
-            return redirect()->route('users.index')->with('success','User Status Updated Successfully!');
-        } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
-        }
-    }
-
-    /**
-     * Edit User
-     * @param Integer $user
-     * @return Collection $user
-     * @author Shani Singh
-     */
-    public function edit(User $user)
-    {
-        $roles = Role::all();
-        return view('users.edit')->with([
-            'roles' => $roles,
-            'user'  => $user
-        ]);
-    }
-
-    /**
-     * Update User
-     * @param Request $request, User $user
-     * @return View Users
-     * @author Shani Singh
-     */
-    public function update(Request $request, User $user)
-    {
-        // Validations
-        $request->validate([
-            'first_name'    => 'required',
-            'last_name'     => 'required',
-            'email'         => 'required|unique:users,email,'.$user->id.',id',
-            'mobile_number' => 'required|numeric|digits:10',
-            'role_id'       =>  'required|exists:roles,id',
-            'status'       =>  'required|numeric|in:0,1',
-        ]);
-
-        DB::beginTransaction();
-        try {
-
-            // Store Data
-            $user_updated = User::whereId($user->id)->update([
-                'first_name'    => $request->first_name,
-                'last_name'     => $request->last_name,
-                'email'         => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'role_id'       => $request->role_id,
-                'status'        => $request->status,
+        // Check if client email exists
+        if (!$proposal->client || !$proposal->client->email) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Client email not found.',
             ]);
-
-            // Delete Any Existing Role
-            DB::table('model_has_roles')->where('model_id',$user->id)->delete();
-
-            // Assign Role To User
-            $user->assignRole($user->role_id);
-
-            // Commit And Redirected To Listing
-            DB::commit();
-            return redirect()->route('users.index')->with('success','User Updated Successfully.');
-
-        } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
-    }
 
-    /**
-     * Delete User
-     * @param User $user
-     * @return Index Users
-     * @author Shani Singh
-     */
-    public function delete(User $user)
-    {
-        DB::beginTransaction();
+        $data = [
+            "subject" => $proposal->title,
+            "app_name" => getSetting('app-name'),
+            "proposal" => $proposal,
+        ];
+
+
         try {
-            // Delete User
-            User::whereId($user->id)->delete();
-
-            DB::commit();
-            return redirect()->route('users.index')->with('success', 'User Deleted Successfully!.');
-
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            Mail::to($proposal->client->email)->send(new ExampleMail($data));
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Proposal email sending successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send proposal email. ' . $e->getMessage(),
+            ]);
         }
     }
 
-    /**
-     * Import Users
-     * @param Null
-     * @return View File
-     */
-    public function importUsers()
-    {
-        return view('users.import');
-    }
-
-    public function uploadUsers(Request $request)
-    {
-        Excel::import(new UsersImport, $request->file);
-
-        return redirect()->route('users.index')->with('success', 'User Imported Successfully');
-    }
-
-    public function export()
-    {
-        return Excel::download(new UsersExport, 'users.xlsx');
-    }
+    // public function export()
+    // {
+    //     return Excel::download(new UsersExport, 'users.xlsx');
+    // }
 
 }

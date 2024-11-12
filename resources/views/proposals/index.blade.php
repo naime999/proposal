@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('title', 'Proposal List')
-
+@section('css')
+@include('common.datatable_style')
+@endsection
 @section('content')
     <div class="container-fluid">
 
@@ -9,18 +11,16 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Proposals</h1>
             <div class="d-flex align-items-center justify-content-between bd-highlight">
-                <button class="btn btn-sm btn-primary mr-3" data-toggle="modal" data-target="#addModal">
-                    <i class="fas fa-plus"></i> New Proposal
-                </button>
+                @can('proposal-create')
+                    <button class="btn btn-sm btn-primary mr-3" data-toggle="modal" data-target="#addModal">
+                        <i class="fas fa-plus"></i> New Proposal
+                    </button>
+                @endcan
                 <a href="{{ route('users.export') }}" class="btn btn-sm btn-success">
                     <i class="fas fa-check"></i> Export To Excel
                 </a>
             </div>
         </div>
-
-        {{-- Alert Messages --}}
-        @include('common.alert')
-
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -33,8 +33,7 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
-                            <th>Sub Title</th>
-                            <th>Image</th>
+                            <th>Client</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -52,22 +51,43 @@
 @endsection
 
 @section('scripts')
-<input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
+<script src="{{ asset('admin/vendor/bootstrap-5.1.3-dist/js/bootstrap.bundle.js') }}"></script>
+@include('common.datatable_js')
 <script src="{{ asset('admin/vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
-<script>
-    function action(){
-        swal.fire({
-            title: "Are you sure?",
-            text: "You want to delete this Work!",
-            icon: "warning",
-            showCloseButton: true,
-            // showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: `Delete`,
-            // dangerMode: true,
+@if($errors->any())
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let errorMessages = '';
+            @foreach($errors->all() as $error)
+                errorMessages += '{{ $error }}<br>';
+            @endforeach
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Field Error',
+                html: errorMessages,
+                showConfirmButton: false,
+                timerProgressBar: true,
+                timer: 1500
+            });
         });
-    }
+    </script>
+@endif
+<script>
     // ----------------------------------------------------- Datatable
+    function format ( d ) {
+        var count = 0;
+        var html = '';
+        html += '<div class="row">';
+            d.sections.forEach(datarow => {
+                console.log(datarow);
+                var a = datarow.title;
+                count++;
+                html += '<div class="col-md-2">'+a+'</div>';
+            });
+        html += '</div>';
+        return html;
+    }
     function showDatatable(){
         var devisData = $('#proposalTable').DataTable({
             bAutoWidth: false,
@@ -76,15 +96,15 @@
             iDisplayLength: 10,
             ajax: {
                 url: "{{ route('users.proposals.get') }}",
-                method: "POST",
+                method: "GET",
                 data: function (d) {
-                    d._token = $('input[name="_token"]').val();
+                    d._token = "{{ csrf_token() }}";
                 }
             },
             columnDefs: [
                 {width: '5%', className: 'text-center', targets: [0] },
-                {className: 'text-center', targets: [4] },
-                {width: '5%', className: 'text-center', targets: [5] },
+                {className: 'text-center', targets: [3] },
+                {width: '5%', className: 'text-center', targets: [4] },
             ],
              columns: [
                 {
@@ -95,17 +115,30 @@
                 },
                 // {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                 {data: 'title', name: 'title'},
-                {data: 'sub_title', name: 'sub_title'},
-                {data: 'image', name: 'image'},
+                {data: 'client', name: 'client'},
                 {data: 'status', name: 'status'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
             "aaSorting": [],
             language: {
-                emptyTable: 'No available work, Please add a work'
+                emptyTable: '<div class="py-4 border-1">No available proposal</div>'
             },
         });
-        showDatatable();
+
+        $('#proposalTable tbody').on('click', 'td.dt-control', function () {
+            var tr = $(this).closest('tr');
+            var row = devisData.row( tr );
+            if ( row.child.isShown() ) {
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                row.child( format(row.data()) ).show();
+                tr.addClass('shown');
+                // $(tr).next('tr').children().addClass('p-0');
+            }
+        });
     }
+    showDatatable();
 </script>
 @endsection

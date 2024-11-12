@@ -49,8 +49,13 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function(){
     Route::delete('/delete/{user}', [UserController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{user_id}/{status}', [UserController::class, 'updateStatus'])->name('status');
 
-    // ------------- Proposal Routes
-    Route::get('/clints', [ClientController::class, 'index'])->name('clints');
+    // ------------- Client Routes
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients');
+    Route::get('/clients/get', [ClientController::class, 'getClients'])->name('clients.get');
+    Route::post('/client/create', [ClientController::class, 'create'])->name('client.create');
+    Route::get('/client/get', [ClientController::class, 'getClient'])->name('client.get');
+    Route::post('/client/update', [ClientController::class, 'updateClient'])->name('client.update');
+    Route::post('/client/delete', [ClientController::class, 'deleteClient'])->name('client.delete');
 
     // ------------- Proposal Routes
     Route::get('/proposals', [ProposalController::class, 'index'])->name('proposals');
@@ -62,14 +67,19 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function(){
     Route::post('/signature/get', [ProposalController::class, 'getSignature'])->name('signature.get');
     Route::post('/signature/save', [ProposalController::class, 'saveSignature'])->name('signature.save');
     Route::post('/proposal/create', [ProposalController::class, 'create'])->name('proposal.create');
-    Route::post('/proposal/load', [ProposalController::class, 'loadData'])->name('proposal.load');
+    Route::get('/proposal/show/{slug}', [ProposalController::class, 'showProposal'])->name('proposal.show');
+    Route::get('/proposal/load/{slug}', [ProposalController::class, 'loadData'])->name('proposal.load');
     Route::post('/proposal/update', [ProposalController::class, 'updateData'])->name('proposal.update');
+    Route::post('/proposal/send', [ProposalController::class, 'sendProposal'])->name('proposal.send');
 
 
     Route::get('/import-users', [UserController::class, 'importUsers'])->name('import');
     Route::post('/upload-users', [UserController::class, 'uploadUsers'])->name('upload');
 
     Route::get('export/', [UserController::class, 'export'])->name('export');
+
+    // send email
+    Route::post('/send-email', [EmailController::class, 'sendEmail'])->name('send.email');
 
 });
 

@@ -6,7 +6,7 @@
 <div class="row justify-content-center">
 
     <div class="text-center mt-5">
-        <h1 class="text-white">Tech-Admin - Laravel Admin Panel</h1>
+        <h1 class="text-white">{{ getSetting('app-name')->value }} Admin Panel</h1>
     </div>
 
     <div class="col-xl-10 col-lg-12 col-md-9">
@@ -14,11 +14,13 @@
             <div class="card-body p-0">
                 <!-- Nested Row within Card Body -->
                 <div class="row">
-                    <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                    <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                        <img src="{{ asset('images/login-bg.jpg') }}" width="100%">
+                    </div>
                     <div class="col-lg-6">
                         <div class="p-5">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                <h1 class="h4 text-gray-900 mb-4">Welcome</h1>
                             </div>
 
                             @if (session('error'))
@@ -67,9 +69,9 @@
             </div>
         </div>
     </div>
-    
+
     <div class="text-center mt-5">
-        <h6 class="text-white">Developed By : <a class="text-white" href="https://techtoolindia.com">TechTool India</a></h6>
+        <h6 class="text-white">Copyright 2024 <i class="fas fa-copyright"></i> <a class="text-white" href="https://timerni.com/">Time research & innovation</a></h6>
     </div>
 
 </div>

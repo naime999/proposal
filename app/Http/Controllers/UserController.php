@@ -31,7 +31,7 @@ class UserController extends Controller
 
 
     /**
-     * List User 
+     * List User
      * @param Nill
      * @return Array $user
      * @author Shani Singh
@@ -39,11 +39,12 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('roles')->paginate(10);
+        // return $users;
         return view('users.index', ['users' => $users]);
     }
-    
+
     /**
-     * Create User 
+     * Create User
      * @param Nill
      * @return Array $user
      * @author Shani Singh
@@ -51,7 +52,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-       
+
         return view('users.add', ['roles' => $roles]);
     }
 
@@ -89,7 +90,7 @@ class UserController extends Controller
 
             // Delete Any Existing Role
             DB::table('model_has_roles')->where('model_id',$user->id)->delete();
-            
+
             // Assign Role To User
             $user->assignRole($user->role_id);
 
@@ -191,7 +192,7 @@ class UserController extends Controller
 
             // Delete Any Existing Role
             DB::table('model_has_roles')->where('model_id',$user->id)->delete();
-            
+
             // Assign Role To User
             $user->assignRole($user->role_id);
 
@@ -229,7 +230,7 @@ class UserController extends Controller
     }
 
     /**
-     * Import Users 
+     * Import Users
      * @param Null
      * @return View File
      */
@@ -241,11 +242,11 @@ class UserController extends Controller
     public function uploadUsers(Request $request)
     {
         Excel::import(new UsersImport, $request->file);
-        
+
         return redirect()->route('users.index')->with('success', 'User Imported Successfully');
     }
 
-    public function export() 
+    public function export()
     {
         return Excel::download(new UsersExport, 'users.xlsx');
     }

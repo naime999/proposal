@@ -14,7 +14,7 @@
 
     <div class="row">
         <div class="col-md-12">
-            <h2 class="text-center mb-3">Welcome To Tech-Admin Dashboard!</h2>
+            <h2 class="text-center mb-3">Welcome To {{ getSetting('app-name')->value }} Dashboard!</h2>
         </div>
     </div>
 
@@ -105,7 +105,7 @@
         </div>
     </div>
 
-    
+
 
 </div>
 @endsection

@@ -51,7 +51,7 @@
 
                     <div class="col-md-12 border rounded sig-view signature-pad" id="signature-pad" style="height: 200px;">
                         <div class="signature-pad--body">
-                            <canvas></canvas>
+                            <canvas width="258" height="80"></canvas>
                         </div>
                         <div class="signature-pad--footer">
                             <div class="description">Sign above</div>

@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <img class="rounded-circle mt-5" width="150px" src="{{ asset('admin/img/undraw_profile.svg') }}">
+                    <img class="rounded-circle mt-5" width="150px" src="{{ getAvatar() }}">
                     <span class="font-weight-bold">{{ auth()->user()->full_name }}</span>
                     <span class="text-black-50"><i>Role:
                             {{ auth()->user()->roles
@@ -35,7 +35,7 @@
                     <form action="{{ route('profile.update') }}" method="POST">
                         @csrf
                         <div class="row mt-2">
-                            <div class="col-md-4">
+                            <div class="col-md-6 mb-3">
                                 <label class="labels">First Name</label>
                                 <input type="text" class="form-control @error('first_name') is-invalid @enderror"
                                     name="first_name" placeholder="First Name"
@@ -45,7 +45,7 @@
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6 mb-3">
                                 <label class="labels">Last Name</label>
                                 <input type="text" name="last_name"
                                     class="form-control @error('last_name') is-invalid @enderror"
@@ -56,7 +56,7 @@
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6 mb-3">
                                 <label class="labels">Mobile Number</label>
                                 <input type="text" class="form-control @error('mobile_number') is-invalid @enderror" name="mobile_number"
                                     value="{{ old('mobile_number') ? old('mobile_number') : auth()->user()->mobile_number }}"
@@ -65,8 +65,24 @@
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="imageUpload" class="form-label">Proposal Logo</label>
+                                    <input class="form-control" type="file" id="imageUpload" accept="image/*">
+                                </div>
+                                <input type="hidden" class="form-control" id="baseImage" name="proposal_image" value="" />
+                                <img id="imagePreview" class="border p-3" src="{{ getSetting('proposal-logo')->value }}" alt="No Image Found" style="max-width: 50%; height: auto;" />
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="appImageUpload" class="form-label">App Logo</label>
+                                    <input class="form-control" type="file" id="appImageUpload" accept="image/*">
+                                </div>
+                                <input type="hidden" class="form-control" id="baseAppImage" name="app_image" value="" />
+                                <img id="appImagePreview" class="border p-3" src="{{ getSetting('app-logo')->value }}" alt="No Image Found" style="max-width: 50%; height: auto;" />
+                            </div>
                         </div>
-                        <div class="mt-5 text-center">
+                        <div class="mt-5 text-end">
                             <button class="btn btn-primary profile-button" type="submit">Update Profile</button>
                         </div>
                     </form>
@@ -110,10 +126,33 @@
                     </form>
                 </div>
             </div>
-
         </div>
-
-
-
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.getElementById('imageUpload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('baseImage').value = e.target.result;
+            };
+            reader.readAsDataURL(file); // Convert image file to base64 string
+        }
+    });
+    document.getElementById('appImageUpload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('appImagePreview').src = e.target.result;
+                document.getElementById('baseAppImage').value = e.target.result;
+            };
+            reader.readAsDataURL(file); // Convert image file to base64 string
+        }
+    });
+</script>
 @endsection

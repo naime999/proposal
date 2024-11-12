@@ -1,11 +1,12 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-university"></i>
+            <img src="{{ asset(getSetting('app-logo')->value) }}" alt="Logo" height="30">
         </div>
-        <div class="sidebar-brand-text mx-3">Tech-Admin</div>
+        @if (getSetting('app-name')->value != "")
+        <div class="sidebar-brand-text mx-3">{{ getSetting('app-name')->value }}</div>
+        @endif
     </a>
 
     <!-- Divider -->
@@ -26,18 +27,27 @@
     <div class="sidebar-heading"> Management </div>
 
     <!-- Nav Item  -->
-    <li class="nav-item {{ request()->routeIs('users.clints') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('users.clints') }}">
-            <i class="fas fa-solid fa-file"></i>
-            <span>Clints</span>
-        </a>
-    </li>
-    <li class="nav-item {{ request()->routeIs('users.proposals') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('users.proposals') }}">
-            <i class="fas fa-solid fa-file"></i>
-            <span>Proposals</span>
-        </a>
-    </li>
+    @can('client-list')
+        <li class="nav-item {{ request()->routeIs('users.clients') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('users.clients') }}">
+                <i class="fas fa-solid fa-file"></i>
+                <span>Clients</span>
+            </a>
+        </li>
+    @endcan
+    @can('proposal-list')
+        <li class="nav-item {{ request()->routeIs('users.proposals') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('users.proposals') }}">
+                <i class="fas fa-solid fa-file"></i>
+                <span>Proposals</span>
+                @if (getProposalCount() > 0)
+                <span class="position-absolute top-50 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ getProposalCount() }}
+                </span>
+                @endif
+            </a>
+        </li>
+    @endcan
 
     <!-- Divider -->
     <hr class="sidebar-divider">

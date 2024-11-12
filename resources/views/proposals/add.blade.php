@@ -64,7 +64,10 @@
                 <div class="text-center d-flex justify-content-center">
                     <div class="border" id="builder-view" style="width: 900px; max-width: 900px; background-color: white;">
                         <div class="heading">
-                            <div class="position-relative" id="header" style="background-image: url({{ asset('uploads/proposal/cover.jpg') }}); height:1250px;">
+                            <div class="position-relative" id="header" style="background: rgb(9,27,87); background: linear-gradient(180deg, rgba(9,27,87,1) 0%, rgba(83,120,239,1) 100%); height:1250px;">
+                                <div class="position-absolute top-0 start-0 m-5 p-3 rounded" style="background: rgba(255, 255, 255, 0.549); max-width: 30%;" >
+                                    <img data-key="logo" src="{{ asset(getSetting('proposal-logo')->value) }}" width="100%" />
+                                </div>
                                 <div class="position-absolute top-50 start-50 translate-middle">
                                     <h1 class="text-white text-uppercase font-weight-bold pro-data" data-key="title">{{ $proposal->title }}</h1>
                                 </div>
@@ -88,6 +91,7 @@
                                         </div>
                                         <div class="col-md-8 p-3 text-start section-description" data-key="description">{!! $section->description !!}</div>
                                     </div>
+                                    @can('proposal-create', 'proposal-edit')
                                     <div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">
                                         <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="{{ $section->id }}">
                                             <i class="fas fa-plus"></i>
@@ -99,6 +103,7 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
+                                    @endcan
                                 </div>
                             @endforeach
                         </div>
@@ -109,16 +114,20 @@
                             </div>
                             <div class="col-md-8 p-3 row">
                                 <div class="col-md-6">
-                                    <div class="position-relative signature-view d-flex justify-content-center align-items-center" style="height: 80px;">
+                                    <div class="position-relative signature-view d-flex justify-content-center align-items-center" data-control="{{ Auth()->user()->id == $proposal->user_id?'true':'false' }}" style="height: 80px;">
                                         @if ($proposal->adminSignature)
                                             @if ($proposal->adminSignature->image != null)
                                                 <img class="h-100 sig-image-admin" src="{{ asset($proposal->adminSignature->image) }}" alt="{{ $proposal->adminSignature->title }}">
                                             @else
                                                 <span class="defult-signature sig-title-admin">{{ $proposal->adminSignature->title }}</span>
                                             @endif
-                                            <button type="button" class="signature-edit btn btn-sm btn-secondary position-absolute bottom-0 end-0" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="1"><i class="fas fa-pen"></i> Edit</button>
+                                            @if (Auth()->user()->id == $proposal->user_id)
+                                                <button type="button" class="signature-edit btn btn-sm btn-secondary position-absolute bottom-0 end-0" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="1"><i class="fas fa-pen"></i> Edit</button>
+                                            @endif
                                         @else
-                                            <button class="btn btn-sm btn-primary" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="1">Add Signature</button>
+                                            @if (Auth()->user()->id == $proposal->user_id)
+                                                <button class="btn btn-sm btn-primary" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="1">Add Signature</button>
+                                            @endif
                                         @endif
                                     </div>
                                     <hr class="m-0">
@@ -131,16 +140,20 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="position-relative signature-view d-flex justify-content-center align-items-center" style="height: 80px;">
+                                    <div class="position-relative signature-view d-flex justify-content-center align-items-center" data-control="{{ Auth()->user()->id == $proposal->client_id?'true':'false' }}" style="height: 80px;">
                                         @if ($proposal->clientSignature)
                                             @if ($proposal->clientSignature->image != null)
                                                 <img class="h-100 sig-image-client" src="{{ asset($proposal->clientSignature->image) }}" alt="{{ $proposal->clientSignature->title }}">
                                             @else
                                                 <span class="defult-signature sig-title-client">{{ $proposal->clientSignature->title }}</span>
                                             @endif
-                                            <button type="button" class="signature-edit btn btn-sm btn-secondary position-absolute bottom-0 end-0" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="2"><i class="fas fa-pen"></i> Edit</button>
+                                            @if (Auth()->user()->id == $proposal->client_id)
+                                                <button type="button" class="signature-edit btn btn-sm btn-secondary position-absolute bottom-0 end-0" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="2"><i class="fas fa-pen"></i> Edit</button>
+                                            @endif
                                         @else
-                                            <button class="btn btn-sm btn-primary" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="2">Add Signature</button>
+                                            @if (Auth()->user()->id == $proposal->client_id)
+                                                <button class="btn btn-sm btn-primary" onclick="updateSignature(this)" data-id="{{ $proposal->id }}" user-type="2">Add Signature</button>
+                                            @endif
                                         @endif
                                     </div>
                                     <hr class="m-0">
@@ -154,7 +167,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -165,6 +177,9 @@
 @endsection
 
 @section('scripts')
+<script>
+    load.show();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('admin/vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script src="{{ asset('admin/vendor/ckeditor/ckeditor.js') }}"></script>
@@ -179,12 +194,8 @@ function loadData(){
     console.log("----- Load Proposal Data -----");
     // load.show();
     $.ajax({
-        url: "{{ route('users.proposal.load') }}",
-        method: "POST",
-        data: {
-            id: 1,
-            "_token": "{{ csrf_token() }}"
-        },
+        url: "{{ route('users.proposal.load', $proposal->slug) }}",
+        method: "get",
         dataType: 'json',
         success: function(data) {
             console.log("Full Data",data);
@@ -220,10 +231,23 @@ function builderInit(data){
 }
 
 function addHeading(data){
-    var coverUrl = '{{ asset('') }}' + data.cover;
+    if(data.cover != null){
+        var coverUrl = '{{ asset('') }}' + data.cover;
+        var bgCss = {"background-image":'url('+coverUrl+')', "height":'1250px'};
+    }else{
+        var bgCss = {"background": "rgb(9,27,87)", "background": "linear-gradient(180deg, rgba(9,27,87,1) 0%, rgba(83,120,239,1) 100%)", "height":'1250px'};
+    }
+    var logo = "{{ asset(getSetting('proposal-logo')->value) }}";
+
     var html = '';
     html += '<div class="position-relative" id="header">';
+        html += '<div class="position-absolute top-0 start-0 m-5 p-3 rounded" style="background: rgba(255, 255, 255, 0.549); max-width: 30%;" ><img data-key="logo" src="'+logo+'" width="100%" /></div>';
+        @can('proposal-create', 'proposal-edit')
         html += '<div class="position-absolute top-50 start-50 translate-middle"><h1 class="text-white text-uppercase font-weight-bold pro-data" data-key="title" contenteditable="true">'+data.title+'</h1></div>';
+        @endcan
+        @cannot('proposal-create', 'proposal-edit')
+         html += '<div class="position-absolute top-50 start-50 translate-middle"><h1 class="text-white text-uppercase font-weight-bold pro-data" data-key="title" >'+data.title+'</h1></div>';
+        @endcannot
         html += '<div class="position-absolute bottom-0 start-0 m-5 text-left">'+
             '<p class="text-white text-uppercase font-weight-bold pro-data m-0">To</p>'+
             '<p class="text-white pro-data" data-key="name">'+data.client.first_name+' '+data.client.last_name+'</p>'+
@@ -233,30 +257,36 @@ function addHeading(data){
             '<p class="text-white pro-data" data-key="email">'+data.client.email+'</p>'+
         '</div>';
     html += '</div>';
-    $('.heading').html(html).find('#header').css({"background-image":'url('+coverUrl+')',"height":'1250px'});
+    $('.heading').html(html).find('#header').css(bgCss);
 }
 
 function addSections(data){
     $('.sections').html("");
     var html = '';
     data.sections.forEach(section => {
-        html += '<div class="section position-relative pb-4" id="section-'+section.id+'" data-id="'+section.id+'" >'+
+        htmlJoin = '';
+        htmlJoin += '<div class="section position-relative pb-4" id="section-'+section.id+'" data-id="'+section.id+'" >'+
             '<div class="row m-0">'+
             '    <div class="col-md-4 p-3">'+
             '        <p class="m-0 text-start text-capitalize section-title" data-key="title">'+section.title+'</p>'+
             '        <p class="m-0 text-start fs-5" data-key="sub_title">'+section.sub_title+'</p>'+
             '    </div>'+
             '    <div class="col-md-8 p-3 text-start section-description"  data-key="description">'+section.description+'</div>'+
-            '</div>'+
-            '<div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">'+
-            '    <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="'+section.id+'"><i class="fas fa-plus"></i></button>'+
-            '    <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="'+section.id+'"><i class="fas fa-pen"></i></button>'+
-            '    <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="'+section.id+'"><i class="fas fa-trash"></i></button>'+
-            '</div>'+
-        '</div>';
+            '</div>';
+            @can('proposal-create', 'proposal-edit')
+            if(data.status != 2){
+                htmlJoin += '<div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">'+
+                '    <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="'+section.id+'"><i class="fas fa-plus"></i></button>'+
+                '    <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="'+section.id+'"><i class="fas fa-pen"></i></button>'+
+                '    <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="'+section.id+'"><i class="fas fa-trash"></i></button>'+
+                '</div>';
+            }
+            @endcan
+        htmlJoin += '</div>';
+        html += htmlJoin;
     });
     $('.sections').append(html);
-    initSection();
+    initSection(data);
 }
 
 function addSignature(data){
@@ -329,14 +359,18 @@ function saveData(save){
     });
 }
 
-function initSection(){
-    $(".sections").find('.section').each(function(){
-        $(this).find('.add-section-btn').hide();
-        $(this).hover(function(){
-            $(this).toggleClass("border border-primary");
-            $(this).find('.add-section-btn').toggle();
-        });
-    });
+function initSection(data){
+    @can('proposal-create', 'proposal-edit')
+        if(data.status != 2){
+            $(".sections").find('.section').each(function(){
+                $(this).find('.add-section-btn').hide();
+                $(this).hover(function(){
+                    $(this).toggleClass("border border-primary");
+                    $(this).find('.add-section-btn').toggle();
+                });
+            });
+        }
+    @endcan
 }
 initSection();
 
@@ -344,8 +378,12 @@ function initSignature(){
     $(document).find('.signature-view').each(function(){
         $(this).find('.signature-edit').hide();
         $(this).hover(function(){
-            $(this).toggleClass("border border-secondary");
-            $(this).find('.signature-edit').toggle();
+            let isControlEnabled = $(this).attr('data-control') === 'true' || $(this).attr('data-control') === '1';
+            isControlEnabled = Boolean(JSON.parse(isControlEnabled));
+            if(isControlEnabled){
+                $(this).toggleClass("border border-secondary");
+                $(this).find('.signature-edit').toggle();
+            }
         });
     });
 }
@@ -582,6 +620,7 @@ function submitSection(){
         data: formData,
         dataType: 'json',
         success: function(data) {
+            console.log(data);
             if(data.status == 'success'){
                 $('#sectionModal').modal('toggle');
                 Swal.fire({
@@ -606,9 +645,9 @@ function submitSection(){
                     loadData();
                 });
             }
-            console.log(data);
         },
         error: function(xhr, status, error) {
+            console.log(xhr.status);
             if (xhr.status === 422) {
                 var errors = xhr.responseJSON.errors;
                 $('.is-invalid').removeClass('is-invalid');
@@ -619,6 +658,15 @@ function submitSection(){
                     input.addClass('is-invalid');
 
                     input.after('<span class="text-danger">' + messages[0] + '</span>');
+                });
+            }if (xhr.status === 403) {
+                Swal.fire({
+                    title: xhr.statusText,
+                    text: xhr.responseJSON.message,
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 1500
                 });
             } else {
                 console.error('An unexpected error occurred:', error);
@@ -720,6 +768,54 @@ function uploadSignature(formData){
             console.log(data);
         },
     });
+}
+
+function sendData(thisData){
+    load.show();
+    var proId = $(thisData).attr('data-id');
+    $.ajax({
+        url: "{{ route('users.proposal.send') }}",
+        method: "POST",
+        data: {
+            id: proId,
+            "_token": "{{ csrf_token() }}"
+        },
+        dataType: 'json',
+        success: function(data) {
+            load.hide();
+            if(data.status == 'success'){
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message,
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 1500
+                });
+            }else{
+                Swal.fire({
+                    title: 'Failed',
+                    text: data.message,
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 1500
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            load.hide();
+            Swal.fire({
+                title: xhr.statusText,
+                text: xhr.responseJSON.message,
+                icon: 'error',
+                showConfirmButton: false,
+                timerProgressBar: true,
+                timer: 1500
+            });
+        }
+    });
+
 }
 </script>
 <script src="{{ asset('admin/vendor/signature_pad/js/app.js') }}"></script>

@@ -7,22 +7,14 @@
         </div>
     </div>
 
-    <!-- Topbar Search -->
-    {{-- <form
-        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-        <div class="input-group">
-            <input type="text" class="form-control bg-light border-1 small" placeholder="Search for..."
-                aria-label="Search" aria-describedby="basic-addon2">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search fa-sm"></i>
-                </button>
-            </div>
-        </div>
-    </form> --}}
-    <!-- Save button -->
+    <!-- buttons -->
     <div class="d-flex align-items-right justify-content-between">
+        @can('proposal-create', 'proposal-edit')
         <button class="btn btn-sm btn-success" type="submit" onclick="saveData(this)" data-id="{{ $proposal->id }}"><i class="fas fa-save pr-2"></i>Save</button>
+        @endcan
+        @can('proposal-create', 'proposal-edit')
+        <button class="btn btn-sm btn-success ml-2" type="submit" onclick="sendData(this)" data-id="{{ $proposal->id }}"><i class="fas fa-send pr-2"></i>Send</button>
+        @endcan
         <a class="btn btn-sm btn-success ml-2" href="{{ url()->previous() }}"><i class="fas fa-arrow-left pr-2"></i>back</a>
     </div>
 </nav>
