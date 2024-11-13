@@ -30,7 +30,7 @@
     @can('client-list')
         <li class="nav-item {{ request()->routeIs('users.clients') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('users.clients') }}">
-                <i class="fas fa-solid fa-file"></i>
+                <i class="fas fa-solid fa-users"></i>
                 <span>Clients</span>
             </a>
         </li>
@@ -98,9 +98,9 @@
         </a>
     </li>
     <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
+    {{-- <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
-    </div>
+    </div> --}}
 
 
 </ul>

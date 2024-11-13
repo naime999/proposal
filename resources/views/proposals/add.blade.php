@@ -48,7 +48,7 @@
 </script>
 @endsection
 @section('content')
-    <div class="container-fluid" style="">
+    <div class="container-fluid builder" style="">
         <div class="d-flex">
             <!-- Sidebar Menu -->
             <div class="">
@@ -177,22 +177,18 @@
 @endsection
 
 @section('scripts')
-<script>
-    load.show();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('admin/vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script src="{{ asset('admin/vendor/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ asset('admin/vendor/cropper/cropper.js') }}"></script>
 <script src="{{ asset('admin/vendor/signature_pad/js/signature_pad.js') }}"></script>
 <script>
-// Loader
-// loader.initLoaderAll();
-// ------
 CKEDITOR.replace('editor');
+$('.builder').ready(function(){
+    load.show();
+});
 function loadData(){
     console.log("----- Load Proposal Data -----");
-    // load.show();
     $.ajax({
         url: "{{ route('users.proposal.load', $proposal->slug) }}",
         method: "get",
@@ -202,7 +198,6 @@ function loadData(){
             clientInfoHtml(data.client);
             sectionsHtml(data.sections);
             builderInit(data);
-            load.hide();
         }
     });
 }
@@ -228,6 +223,7 @@ function builderInit(data){
     addHeading(data);
     addSections(data);
     addSignature(data);
+    load.hide();
 }
 
 function addHeading(data){
@@ -313,6 +309,7 @@ function addSignature(data){
             $(".sig-client").text(data.client.first_name+" "+data.client.last_name);
         }
     }
+    initSignature();
 }
 
 function saveData(save){
