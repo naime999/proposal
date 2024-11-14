@@ -1,4 +1,4 @@
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalExample" aria-hidden="true">
+<div class="modal fade addProposal" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalExample" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -33,7 +33,7 @@
                         @enderror
                     </div>
                     {{-- Select status --}}
-                    <div class="col-md-12 mb-3">
+                    {{-- <div class="col-md-12 mb-3">
                         <label>Status <span style="color:red;">*</span></label>
                         <select class="form-control form-control-user @error('status') is-invalid @enderror" name="status">
                             <option value="0" selected>Draft</option>
@@ -43,7 +43,7 @@
                         @error('status')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
-                    </div>
+                    </div> --}}
                 </form>
             </div>
             <div class="modal-footer">

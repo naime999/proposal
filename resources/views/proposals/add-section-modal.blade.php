@@ -11,6 +11,7 @@
                 <form id="section-form" class="row" method="POST" action="{{ route('users.section.add') }}">
                     @csrf
                     <input type="hidden" id="section-id" name="section_id" value="" />
+                    <input type="hidden" id="proposal-id" name="proposal_id" value="" />
                     {{-- Section Title --}}
                     <div class="col-md-6 mb-3">
                         <label>Section Title <span style="color:red;">*</span></label>

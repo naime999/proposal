@@ -97,7 +97,6 @@ class ProposalController extends Controller
         $this->validate($request, [
             'client_id' => 'required',
             'title' => 'required|max:500',
-            'status' => 'required',
         ],[
             "client_id.required" => "The client field is required",
         ]);
@@ -109,7 +108,6 @@ class ProposalController extends Controller
         $newProposal->client_id = $request->client_id;
         $newProposal->title = $request->title;
         $newProposal->slug = Str::slug($request->title, '-');
-        $newProposal->status = $request->status;
 
         if($newProposal->save()){
             return redirect()->route('users.proposal.show', ['slug' => $newProposal->slug]);
@@ -154,13 +152,13 @@ class ProposalController extends Controller
 
         $oldSection = ProposalSection::where('id', $request->section_id)->with('proposal')->first();
         $newSection = new ProposalSection();
-        $newSection->proposal_id = $oldSection->proposal_id;
+        $newSection->proposal_id = $oldSection ? $oldSection->proposal_id : $request->proposal_id;
         $newSection->type = 1;
         $newSection->title = $request->title;
         $newSection->sub_title = $request->sub_title;
         $newSection->slug = Str::slug($request->title, '-');
         $newSection->description = $request->description;
-        $newSection->sort = ($oldSection->sort + 1);
+        $newSection->sort = $oldSection ? ($oldSection->sort + 1) : 1;
         $newSection->status = $request->status;
         // return $newSection;
 

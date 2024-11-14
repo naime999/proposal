@@ -82,30 +82,38 @@
                             </div>
                         </div>
                         <div class="sections">
-                            @foreach ($proposal->sections as $section)
-                                <div class="section position-relative pb-4" id="section-{{ $section->id }}"  data-id="{{ $section->id }}">
-                                    <div class="row m-0">
-                                        <div class="col-md-4 p-3">
-                                            <p class="m-0 text-start text-capitalize section-title" data-key="title">{{ $section->title }}</p>
-                                            <p class="m-0 text-start fs-5" data-key="sub_title">{{ $section->sub_title }}</p>
+                            @if($proposal->sections->count() > 0)
+                                @foreach ($proposal->sections as $section)
+                                    <div class="section position-relative pb-4" id="section-{{ $section->id }}"  data-id="{{ $section->id }}">
+                                        <div class="row m-0">
+                                            <div class="col-md-4 p-3">
+                                                <p class="m-0 text-start text-capitalize section-title" data-key="title">{{ $section->title }}</p>
+                                                <p class="m-0 text-start fs-5" data-key="sub_title">{{ $section->sub_title }}</p>
+                                            </div>
+                                            <div class="col-md-8 p-3 text-start section-description" data-key="description">{!! $section->description !!}</div>
                                         </div>
-                                        <div class="col-md-8 p-3 text-start section-description" data-key="description">{!! $section->description !!}</div>
+                                        @can('proposal-create', 'proposal-edit')
+                                        <div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="{{ $section->id }}" data-pro-id="{{ $proposal->id }}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="{{ $section->id }}">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="{{ $section->id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        @endcan
                                     </div>
-                                    @can('proposal-create', 'proposal-edit')
-                                    <div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="{{ $section->id }}">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="{{ $section->id }}">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="{{ $section->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                    @endcan
+                                @endforeach
+                            @else
+                                <div class="p-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="" data-pro-id="{{ $proposal->id }}">
+                                        <i class="fas fa-plus"></i> Add New Section
+                                    </button>
                                 </div>
-                            @endforeach
+                            @endif
                         </div>
                         <hr class="m-0">
                         <div class="row m-0 my-3" id="signature">
@@ -257,41 +265,54 @@ function addHeading(data){
 }
 
 function addSections(data){
-    $('.sections').html("");
-    var html = '';
-    data.sections.forEach(section => {
-        htmlJoin = '';
-        htmlJoin += '<div class="section position-relative pb-4" id="section-'+section.id+'" data-id="'+section.id+'" >'+
-            '<div class="row m-0">'+
-            '    <div class="col-md-4 p-3">'+
-            '        <p class="m-0 text-start text-capitalize section-title" data-key="title">'+section.title+'</p>'+
-            '        <p class="m-0 text-start fs-5" data-key="sub_title">'+section.sub_title+'</p>'+
-            '    </div>'+
-            '    <div class="col-md-8 p-3 text-start section-description"  data-key="description">'+section.description+'</div>'+
-            '</div>';
-            @can('proposal-create', 'proposal-edit')
-            if(data.status != 2){
-                htmlJoin += '<div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">'+
-                '    <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="'+section.id+'"><i class="fas fa-plus"></i></button>'+
-                '    <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="'+section.id+'"><i class="fas fa-pen"></i></button>'+
-                '    <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="'+section.id+'"><i class="fas fa-trash"></i></button>'+
+    console.log("Section" ,data.sections.length);
+    if(data.sections.length > 0){
+        $('.sections').html("");
+        var html = '';
+        data.sections.forEach(section => {
+            htmlJoin = '';
+            htmlJoin += '<div class="section position-relative pb-4" id="section-'+section.id+'" data-id="'+section.id+'" >'+
+                '<div class="row m-0">'+
+                '    <div class="col-md-4 p-3">'+
+                '        <p class="m-0 text-start text-capitalize section-title" data-key="title">'+section.title+'</p>'+
+                '        <p class="m-0 text-start fs-5" data-key="sub_title">'+section.sub_title+'</p>'+
+                '    </div>'+
+                '    <div class="col-md-8 p-3 text-start section-description"  data-key="description">'+section.description+'</div>'+
                 '</div>';
-            }
-            @endcan
-        htmlJoin += '</div>';
-        html += htmlJoin;
-    });
-    $('.sections').append(html);
-    initSection(data);
+                @can('proposal-create', 'proposal-edit')
+                if(data.status != 2){
+                    htmlJoin += '<div class="add-section-btn position-absolute bottom-0 end-0 btn-group" role="group" aria-label="Basic example">'+
+                    '    <button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="'+section.id+'"><i class="fas fa-plus"></i></button>'+
+                    '    <button type="button" class="btn btn-sm btn-primary" onclick="editSection(this)" data-id="'+section.id+'"><i class="fas fa-pen"></i></button>'+
+                    '    <button type="button" class="btn btn-sm btn-primary" onclick="deleteSection(this)" data-id="'+section.id+'"><i class="fas fa-trash"></i></button>'+
+                    '</div>';
+                }
+                @endcan
+            htmlJoin += '</div>';
+            html += htmlJoin;
+        });
+        $('.sections').append(html);
+        initSection(data);
+    }else{
+        $('.sections').html("");
+        var html = '';
+        html += '<div class="p-3">'+
+            '<button type="button" class="btn btn-sm btn-primary" onclick="addSection(this)" data-id="" data-pro-id="'+data.id+'"><i class="fas fa-plus"></i> Add New Section </button>'+
+        '</div>';
+        $('.sections').append(html);
+    }
 }
 
 function addSignature(data){
-    console.log("Admin Signatures", data.admin_signature);
-    if(data.admin_signature.title != null){
-        $(".sig-title-admin").text(data.admin_signature.title);
-    }
-    if(data.admin_signature.image != null){
-        $(".sig-image-admin").attr('src', "{{ asset('') }}"+data.admin_signature.image);
+    if(data.admin_signature != null){
+        console.log("Admin Signatures", data.admin_signature);
+        if(data.admin_signature.title != null){
+            $(".sig-title-admin").text(data.admin_signature.title);
+        }
+        if(data.admin_signature.image != null){
+            $(".sig-image-admin").attr('src', "{{ asset('') }}"+data.admin_signature.image);
+        }
+        initSignature();
     }
 
     if(data.client_signature != null){
@@ -308,8 +329,8 @@ function addSignature(data){
         }else{
             $(".sig-client").text(data.client.first_name+" "+data.client.last_name);
         }
+        initSignature();
     }
-    initSignature();
 }
 
 function saveData(save){
@@ -369,7 +390,7 @@ function initSection(data){
         }
     @endcan
 }
-initSection();
+// initSection();
 
 function initSignature(){
     $(document).find('.signature-view').each(function(){
@@ -384,7 +405,6 @@ function initSignature(){
         });
     });
 }
-initSignature();
 
 function updateSignature(sigData){
     var proposalId = $(sigData).attr('data-id');
@@ -479,30 +499,48 @@ $('#imageUpload').on('change', function(event) {
 
 function addSection(sectionData) {
     var sectionId = $(sectionData).attr('data-id');
-    $.ajax({
-        url: "{{ route('users.section.get') }}",
-        method: "GET",
-        data: {
-            id: sectionId,
-            "_token": "{{ csrf_token() }}"
-        },
-        dataType: 'json',
-        success: function(data) {
-            console.log(data);
-            $('.modal-title').text("Create a new section");
-            $('#section-form').attr('action', "{{ route('users.section.add') }}");
-            $('#section-form').find('[name="title"]').val('');
-            $('#section-form').find('[name="sub_title"]').val('');
-            if (CKEDITOR.instances.editor) {
-                CKEDITOR.instances.editor.setData();
-            }
-            $('#section-form').find('[name="status"]').html('<option value="1" selected>Active</option><option value="0">Inactive</option>');
-            $('#sectionModal').find('#submitBtn').html("Create");
+    var proId = $(sectionData).attr('data-pro-id');
+    if(sectionId != ""){
+        $.ajax({
+            url: "{{ route('users.section.get') }}",
+            method: "GET",
+            data: {
+                id: sectionId,
+                "_token": "{{ csrf_token() }}"
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.log(data);
+                $('.modal-title').text("Create a new section");
+                $('#section-form').attr('action', "{{ route('users.section.add') }}");
+                $('#section-form').find('[name="title"]').val('');
+                $('#section-form').find('[name="sub_title"]').val('');
+                if (CKEDITOR.instances.editor) {
+                    CKEDITOR.instances.editor.setData();
+                }
+                $('#section-form').find('[name="status"]').html('<option value="1" selected>Active</option><option value="0">Inactive</option>');
+                $('#sectionModal').find('#submitBtn').html("Create");
 
-            $('#sectionModal').find('#section-id').val(sectionId);
-            $('#sectionModal').modal('toggle');
+                $('#sectionModal').find('#section-id').val(sectionId);
+                $('#sectionModal').find('#proposal-id').val(proId);
+                $('#sectionModal').modal('toggle');
+            }
+        });
+    }else{
+        $('.modal-title').text("Create a new section");
+        $('#section-form').attr('action', "{{ route('users.section.add') }}");
+        $('#section-form').find('[name="title"]').val('');
+        $('#section-form').find('[name="sub_title"]').val('');
+        if (CKEDITOR.instances.editor) {
+            CKEDITOR.instances.editor.setData();
         }
-    });
+        $('#section-form').find('[name="status"]').html('<option value="1" selected>Active</option><optiovalue="0">Inactive</option>');
+        $('#sectionModal').find('#submitBtn').html("Create");
+
+        $('#sectionModal').find('#section-id').val(sectionId);
+        $('#sectionModal').find('#proposal-id').val(proId);
+        $('#sectionModal').modal('toggle');
+    }
 }
 
 function editSection(sectionData) {
@@ -748,7 +786,7 @@ function uploadSignature(formData){
                     timerProgressBar: true,
                     timer: 1500
                 }).then((_) => {
-                    loadData();
+                    location.reload();
                 });
             }else{
                 Swal.fire({
