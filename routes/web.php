@@ -4,8 +4,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,9 +24,10 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Auth::routes(['register' => false]);
+Auth::routes(['register' => false, 'verify' => true]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
 
 // Profile Routes
 Route::prefix('profile')->name('profile.')->middleware('auth')->group(function(){

@@ -5,10 +5,23 @@
 @section('content')
 <div class="row justify-content-center">
 
-    <div class="text-center mt-5">
+    <div class="col-md-12 text-center mt-5">
         <h1 class="text-white">{{ getSetting('app-name')->value }} Admin Panel</h1>
     </div>
-
+    @if (session('verify_error'))
+    <div class="col-md-6 text-center">
+        <div class="alert alert-danger" role="alert">
+            {{ session('verify_error') }}
+        </div>
+    </div>
+    @endif
+    @if (session('verify_success'))
+    <div class="col-md-6 text-center">
+        <div class="alert alert-success" role="alert">
+            {{ session('verify_success') }}
+        </div>
+    </div>
+    @endif
     <div class="col-xl-10 col-lg-12 col-md-9">
         <div class="card o-hidden border-0 shadow-lg my-5">
             <div class="card-body p-0">
@@ -55,9 +68,7 @@
                                             Me</label>
                                     </div>
                                 </div>
-                                <button class="btn btn-primary btn-user btn-block">
-                                    Login
-                                </button>
+                                <button class="btn btn-primary btn-user btn-block">Login</button>
                             </form>
                             <hr>
                             <div class="text-center">

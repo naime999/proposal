@@ -9,12 +9,18 @@ use App\Imports\UsersImport;
 use App\Libraries\CommonFunction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Http\JsonResponse;
+
+use App\Mail\ClientVerifyMail;
+use Illuminate\Support\Facades\Mail;
 
 class ClientController extends Controller
 {
@@ -104,7 +110,15 @@ class ClientController extends Controller
             $newClient->user_id = Auth()->user()->id;
             $newClient->client_id = $newUser->id;
             if($newClient->save()){
-                return redirect()->back()->with('success', 'Create client successful');
+                $verify = $this->verifyClient($newClient)->getData();
+                // dd($verify->status);
+                if($verify->status == 'success'){
+                    return redirect()->back()->with('success', 'Create client and email send successful');
+                }else if($verify->status == 'error'){
+                    return redirect()->back()->with('success', 'Create client successful, '.$verify->message);
+                }else{
+                    return redirect()->back()->with('success', 'Create client successful and email send failed');
+                }
             }else{
                 $deleteUser = User::find($newUser->id);
                 $deleteUser->delete();
@@ -114,6 +128,36 @@ class ClientController extends Controller
             return redirect()->back()->with('error', 'Failed to save client.');
         }
 
+    }
+
+    public function verifyClient($client)
+    {
+        $clientUser = User::find($client->client_id);
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(60),
+            ['id' => $clientUser->id, 'hash' => sha1($clientUser->getEmailForVerification())]
+        );
+
+        $data = [
+            "subject" => "Client account verification",
+            "app_name" => getSetting('app-name'),
+            "verify_url" => $verificationUrl,
+            "client" => $clientUser,
+        ];
+
+        try {
+            Mail::to($clientUser->email)->send(new ClientVerifyMail($data));
+            return response()->json([
+                'status' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send verify email. ' . $e->getMessage(),
+            ]);
+        }
     }
 
     public function getClient(Request $request)
