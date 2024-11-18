@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalSection;
 use App\Models\ProposalSignature;
@@ -42,7 +43,8 @@ class ProposalController extends Controller
 
     public function index()
     {
-        $clients = User::where('role_id',3)->with('roles')->get();
+        $clients = Client::where('user_id', Auth()->user()->id)->with('userInfo')->get();
+        // $clients = User::where('role_id',3)->whereNotNull('email_verified_at')->with('roles')->get();
         return view('proposals.index', compact('clients'));
     }
 

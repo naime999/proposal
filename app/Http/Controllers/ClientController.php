@@ -56,6 +56,9 @@ class ClientController extends Controller
                 ->editColumn('status', function ($list) {
                     return CommonFunction::getStatus($list->userInfo->status);
                 })
+                ->editColumn('enlisted', function ($list) {
+                    return CommonFunction::getEnlistment($list->userInfo->email_verified_at);
+                })
                 ->editColumn('name', function ($list) {
                     return $list->userInfo->first_name." ".$list->userInfo->last_name;
                 })
@@ -78,7 +81,7 @@ class ClientController extends Controller
                     </div>';
                 })
                 ->addIndexColumn()
-                ->rawColumns(['status', 'name', 'action'])
+                ->rawColumns(['status', 'enlisted', 'name', 'action'])
                 ->make(true);
         } catch (\Exception $e) {
             return Redirect::back();

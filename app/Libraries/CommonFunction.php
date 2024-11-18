@@ -56,6 +56,16 @@ class CommonFunction
         }
     }
 
+    public static function getEnlistment($verify) {
+        if ($verify != null) {
+            $class = 'badge rounded-pill px-3 py-1 bg-success bg-glow';
+            $status = 'Enlisted';
+        } else {
+            $class = 'badge rounded-pill px-3 py-1 bg-danger bg-glow';
+            $status = 'Not listed';
+        }
+        return '<span class="' . $class . '">' . $status . '</span>';
+    }
     public static function getStatus($status) {
         if (!empty($status) && $status == 1) {
             $class = 'badge rounded-pill px-3 py-1 bg-success bg-glow';

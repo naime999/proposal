@@ -34,6 +34,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
+                            <th>Enlisted</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -106,13 +107,15 @@
                 columnDefs: [
                     {width: '5%', className: 'text-center', targets: [0] },
                     {className: 'text-center', targets: [4] },
-                    {width: '5%', className: 'text-center', targets: [5] },
+                    {className: 'text-center', targets: [5] },
+                    {width: '5%', className: 'text-center', targets: [6] },
                 ],
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                     {data: 'name', name: 'name'},
                     {data: 'email', name: 'email'},
                     {data: 'phone', name: 'phone'},
+                    {data: 'enlisted', name: 'enlisted'},
                     {data: 'status', name: 'status'},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ],

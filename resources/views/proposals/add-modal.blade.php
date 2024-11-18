@@ -16,7 +16,9 @@
                         <select class="form-control form-control-user @error('client_id') is-invalid @enderror" name="client_id">
                             <option value="" selected disabled>Select a client</option>
                             @foreach ($clients as $client)
-                                <option value="{{ $client->id }}">{{ $client->first_name . ' ' . $client->last_name }}</option>
+                                @if ($client->userInfo->email_verified_at)
+                                    <option value="{{ $client->userInfo->id }}">{{ $client->userInfo->first_name . ' ' . $client->userInfo->last_name }}</option>
+                                @endif
                             @endforeach
                         </select>
                         @error('client_id')
