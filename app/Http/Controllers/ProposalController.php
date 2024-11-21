@@ -229,8 +229,23 @@ class ProposalController extends Controller
     {
         // return $request->all();
         $proposal = Proposal::find($request->id);
-        $proposal->title = $request->title;
-        $proposal->slug = Str::slug($request->title, '-');
+        if($request->title != null){
+            $proposal->title = $request->title;
+            $proposal->slug = Str::slug($request->title, '-');
+        }
+        if($request->cover != null){
+            @unlink($proposal->cover);
+            $baseImage      = $request->cover;
+            $base64_str     = substr($baseImage, strpos($baseImage, ",") + 1);
+            $image          = base64_decode($base64_str);
+            $image_name     = $request->proposal_id . "-" . time() . ".png";
+            $location       = 'uploads/proposal/';
+            if (!file_exists($location)) {
+                mkdir('uploads/proposal/');
+            }
+            Image::make($image)->save($location . $image_name);
+            $proposal->cover = $location . $image_name;
+        }
         if($proposal->save()){
             return response()->json([
                 'status' => 'success',
@@ -393,6 +408,47 @@ class ProposalController extends Controller
 
 
     public function sendProposal(Request $request)
+    {
+        $proposal = Proposal::where('id',$request->id)->with('client')->first();
+
+        // Check if the proposal exists
+        if (!$proposal) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Proposal not found.',
+            ]);
+        }
+
+        // Check if client email exists
+        if (!$proposal->client || !$proposal->client->email) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Client email not found.',
+            ]);
+        }
+
+        $data = [
+            "subject" => $proposal->title,
+            "app_name" => getSetting('app-name'),
+            "proposal" => $proposal,
+        ];
+
+
+        try {
+            Mail::to($proposal->client->email)->send(new ExampleMail($data));
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Proposal email sending successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send proposal email. ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function settingsProposal(Request $request)
     {
         $proposal = Proposal::where('id',$request->id)->with('client')->first();
 

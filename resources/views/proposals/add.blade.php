@@ -4,6 +4,7 @@
 @section('css')
 <link href="{{ asset('fornts/sacramento.css') }}" rel="stylesheet">
 <link href="{{ asset('admin/vendor/signature_pad/css/signature-pad.css') }}" rel="stylesheet">
+<link  href="{{ asset('admin/vendor/cropper/cropper.css') }}" rel="stylesheet">
 <style>
     .section-title {
         font-family: "Poppins", sans-serif;
@@ -32,6 +33,21 @@
         justify-content: center;
         flex-direction: column;
         line-height: .65em;
+    }
+
+    img {
+        display: block;
+        max-width: 100%;
+    }
+    .preview {
+        overflow: hidden;
+        width: 160px;
+        height: 160px;
+        margin: 10px;
+        border: 1px solid red;
+    }
+    .modal-lg {
+        max-width: 1000px !important;
     }
 
 </style>
@@ -182,14 +198,15 @@
     </div>
     @include('proposals.add-section-modal')
     @include('proposals.add-signature-modal')
+    @include('common.cropper_model')
 @endsection
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('admin/vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script src="{{ asset('admin/vendor/ckeditor/ckeditor.js') }}"></script>
-<script src="{{ asset('admin/vendor/cropper/cropper.js') }}"></script>
 <script src="{{ asset('admin/vendor/signature_pad/js/signature_pad.js') }}"></script>
+<script src="{{ asset('admin/vendor/cropper/cropper.js') }}"></script>
 <script>
 CKEDITOR.replace('editor');
 $('.builder').ready(function(){
@@ -854,4 +871,5 @@ function sendData(thisData){
 }
 </script>
 <script src="{{ asset('admin/vendor/signature_pad/js/app.js') }}"></script>
+@include('proposals.settings')
 @endsection
