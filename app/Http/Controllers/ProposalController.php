@@ -246,6 +246,19 @@ class ProposalController extends Controller
             Image::make($image)->save($location . $image_name);
             $proposal->cover = $location . $image_name;
         }
+        if($request->logo != null){
+            @unlink($proposal->logo);
+            $baseImage      = $request->logo;
+            $base64_str     = substr($baseImage, strpos($baseImage, ",") + 1);
+            $image          = base64_decode($base64_str);
+            $image_name     = $request->proposal_id . "-logo-" . time() . ".png";
+            $location       = 'uploads/proposal/';
+            if (!file_exists($location)) {
+                mkdir('uploads/proposal/');
+            }
+            Image::make($image)->save($location . $image_name);
+            $proposal->logo = $location . $image_name;
+        }
         if($proposal->save()){
             return response()->json([
                 'status' => 'success',

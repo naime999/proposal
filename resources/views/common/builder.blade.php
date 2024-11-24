@@ -14,24 +14,26 @@
         @if ($proposal->status != 2)
             @can('proposal-create', 'proposal-edit')
                 <div class="form-group m-0 mr-2">
-                    <input type="file" name="cover" onchange="fileDetailsCrop(this)" data-sl="1"
-                        data-size="900x1250" data-attr="detailsImageView" data-val="coverImage"
-                        data-id="{{ $proposal->id }}" id="details_image" class="image pt-1 form-control d-none"
-                        accept="image/*">
-                    <label class="btn btn-sm btn-success rounded m-0" for="details_image"><i
-                            class="fas fa-gear pr-2"></i>Cover<label>
+                    <input type="file" name="logo" onchange="fileDetailsCrop(this)" data-size="660x230" data-ratio="6.6x2.3" id="logo_image" class="image pt-1 form-control d-none" accept="image/*">
+                    <label class="btn btn-sm btn-primary rounded m-0" for="logo_image"><i class="fas fa-image pr-2"></i>Logo<label>
                 </div>
             @endcan
             @can('proposal-create', 'proposal-edit')
-                <button class="btn btn-sm btn-success" type="submit" onclick="saveData(this)"
+                <div class="form-group m-0 mr-2">
+                    <input type="file" name="cover" onchange="fileDetailsCrop(this)" data-size="900x1250" data-ratio="9/12.5" id="cover_image" class="image pt-1 form-control d-none" accept="image/*">
+                    <label class="btn btn-sm btn-primary rounded m-0" for="cover_image"><i class="fas fa-image pr-2"></i>Cover<label>
+                </div>
+            @endcan
+            @can('proposal-create', 'proposal-edit')
+                <button class="btn btn-sm btn-primary" type="submit" onclick="saveData(this)"
                     data-id="{{ $proposal->id }}"><i class="fas fa-save pr-2"></i>Save</button>
             @endcan
             @can('proposal-create', 'proposal-edit')
-                <button class="btn btn-sm btn-success ml-2" type="submit" onclick="sendData(this)"
+                <button class="btn btn-sm btn-primary ml-2" type="submit" onclick="sendData(this)"
                     data-id="{{ $proposal->id }}"><i class="fas fa-solid fa-envelope pr-2"></i>Send</button>
             @endcan
         @endif
-        <a class="btn btn-sm btn-success ml-2" href="{{ url()->previous() }}"><i
+        <a class="btn btn-sm btn-primary ml-2" href="{{ url()->previous() }}"><i
                 class="fas fa-arrow-left pr-2"></i>back</a>
     </div>
 </nav>

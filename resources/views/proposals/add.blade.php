@@ -82,7 +82,7 @@
                         <div class="heading">
                             <div class="position-relative" id="header" style="background: rgb(9,27,87); background: linear-gradient(180deg, rgba(9,27,87,1) 0%, rgba(83,120,239,1) 100%); height:1250px;">
                                 <div class="position-absolute top-0 start-0 m-5 p-3 rounded" style="background: rgba(255, 255, 255, 0.549); max-width: 30%;" >
-                                    <img data-key="logo" src="{{ asset(getSetting('proposal-logo')->value) }}" width="100%" />
+                                    <img data-key="logo" src="{{ asset($proposal->logo != null ? $proposal->logo : getSetting('proposal-logo')->value) }}" width="100%" />
                                 </div>
                                 <div class="position-absolute top-50 start-50 translate-middle">
                                     <h1 class="text-white text-uppercase font-weight-bold pro-data" data-key="title">{{ $proposal->title }}</h1>
@@ -254,15 +254,20 @@ function builderInit(data){
 function addHeading(data){
     if(data.cover != null){
         var coverUrl = '{{ asset('') }}' + data.cover;
+        if(data.logo != null){
+            var logoUrl = '{{ asset('') }}' + data.logo;
+        }else{
+            var logoUrl = "{{ asset(getSetting('proposal-logo')->value) }}";
+        }
         var bgCss = {"background-image":'url('+coverUrl+')', "height":'1250px'};
     }else{
         var bgCss = {"background": "rgb(9,27,87)", "background": "linear-gradient(180deg, rgba(9,27,87,1) 0%, rgba(83,120,239,1) 100%)", "height":'1250px'};
     }
-    var logo = "{{ asset(getSetting('proposal-logo')->value) }}";
+    // var logo = "{{ asset(getSetting('proposal-logo')->value) }}";
 
     var html = '';
     html += '<div class="position-relative" id="header">';
-        html += '<div class="position-absolute top-0 start-0 m-5 p-3 rounded" style="background: rgba(255, 255, 255, 0.549); max-width: 30%;" ><img data-key="logo" src="'+logo+'" width="100%" /></div>';
+        html += '<div class="position-absolute top-0 start-0 m-5 p-3 rounded" style="background: rgba(255, 255, 255, 0.549); max-width: 30%;" ><img data-key="logo" src="'+logoUrl+'" width="100%" /></div>';
         @can('proposal-create', 'proposal-edit')
         html += '<div class="position-absolute top-50 start-50 translate-middle"><h1 class="text-white text-uppercase font-weight-bold pro-data" data-key="title" contenteditable="true">'+data.title+'</h1></div>';
         @endcan

@@ -25,8 +25,9 @@
     </div>
 </div>
 
-<form id="cover-form" method="POST" action="{{ route('users.proposal.update') }}" enctype="multipart/form-data">
+<form id="proposal-form" method="POST" action="{{ route('users.proposal.update') }}" enctype="multipart/form-data">
     @csrf
     <input type="hidden" name="id" value="{{ $proposal->id }}" />
-    <input type="hidden" class="form-control" id="coverImage" name="cover" value="" />
+    <input type="hidden" class="form-control" name="cover" value="" />
+    <input type="hidden" class="form-control" name="logo" value="" />
 </form>

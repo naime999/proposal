@@ -10,14 +10,12 @@
 
 function fileDetailsCrop(data)
 {
-    let name = $(data).attr('data-val');
-    let name_view = $(data).attr('data-attr');
+    let name = $(data).attr('name');
     let img_size = $(data).attr('data-size');
-    let pro_id = $(data).attr('data-id');
-    $("#crop").attr('name', name);
+    let img_ratio = $(data).attr('data-ratio');
+    $("#crop").attr('data-name', name);
     $("#crop").attr('data-size', img_size);
-    $("#crop").attr('data-id', pro_id);
-    $("#crop").val(name_view);
+    $("#crop").attr('data-ratio', img_ratio);
 }
 
 var $modal = $('#copperModal');
@@ -47,14 +45,16 @@ $("body").on("change", ".image", function(e) {
 });
 $modal.on('shown.bs.modal', function() {
     let img_size = $("#crop").attr('data-size');
+    let img_ratio = $("#crop").attr('data-ratio');
     if (!img_size || !img_size.includes('x')) {
         console.error("Invalid data-size format. Expected 'widthxheight'.");
         return;
     }
     var csize = img_size.split('x');
-    console.log(parseInt(csize[0]),parseInt(csize[1]));
+    var cratio = img_ratio.split('/');
+    // console.log(parseInt(csize[0]),parseInt(csize[1]));
     cropper = new Cropper(image, {
-        aspectRatio: 9 / 12.5,
+        aspectRatio: cratio[0] / cratio[1],
         dragMode: 'move',
         restore: false,
         guides: true,
@@ -80,7 +80,7 @@ $modal.on('shown.bs.modal', function() {
 
 $("#crop").click(function() {
     // alert('okay');
-    let baseImage = $(this).attr('name');
+    let fieldName = $(this).attr('data-name');
     let img_size = $(this).attr('data-size');
     var csize = img_size.split('x');
     canvas = cropper.getCroppedCanvas({
@@ -93,10 +93,14 @@ $("#crop").click(function() {
         reader.readAsDataURL(blob);
         reader.onloadend = function() {
             var base64data = reader.result;
-            console.log("base64 data", base64data,baseImage)
-            var bgCss = {"background-image":'url('+base64data+')', "height":'1250px'};
-            $('#'+baseImage).val(base64data);
-            $('.heading').find('#header').css(bgCss);
+            console.log("base64 data", base64data,fieldName)
+            $('#proposal-form').find('input[name='+fieldName+']').val(base64data);
+            if(fieldName == 'cover'){
+                var bgCss = {"background-image":'url('+base64data+')', "height":'1250px'};
+                $('.heading').find('#header').css(bgCss);
+            }else if(fieldName == 'logo'){
+
+            }
             $modal.modal('hide')
             saveCover();
         }
@@ -105,7 +109,7 @@ $("#crop").click(function() {
 
 function saveCover(){
     load.show();
-    var formData = $('#cover-form').serializeArray();
+    var formData = $('#proposal-form').serializeArray();
     $.ajax({
         url: "{{ route('users.proposal.update') }}",
         method: "POST",
