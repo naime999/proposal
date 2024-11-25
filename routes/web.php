@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,15 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function(){
     Route::get('/proposal/load/{slug}', [ProposalController::class, 'loadData'])->name('proposal.load');
     Route::post('/proposal/update', [ProposalController::class, 'updateData'])->name('proposal.update');
     Route::post('/proposal/send', [ProposalController::class, 'sendProposal'])->name('proposal.send');
+
+    // ------------- Template
+    // Route::get('/template', [ProposalController::class, 'index'])->name('template');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+    Route::get('/categories/get', [CategoryController::class, 'getData'])->name('categories.get');
+    Route::post('/category/create', [CategoryController::class, 'create'])->name('category.create');
+    Route::get('/category/get', [CategoryController::class, 'getCategory'])->name('category.get');
+    Route::post('/category/update', [CategoryController::class, 'updateCategory'])->name('category.update');
+    Route::post('/category/delete', [CategoryController::class, 'deleteCategory'])->name('category.delete');
 
 
     Route::get('/import-users', [UserController::class, 'importUsers'])->name('import');

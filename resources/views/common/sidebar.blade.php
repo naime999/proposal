@@ -35,6 +35,23 @@
             </a>
         </li>
     @endcan
+    @can('category-list')
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#templteDropDown"
+                aria-expanded="true" aria-controls="templteDropDown">
+                <i class="fas fa-user-alt"></i>
+                <span>Template</span>
+            </a>
+            <div id="templteDropDown" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Template Settings</h6>
+                    {{-- <a class="collapse-item" href="{{ route('users.index') }}">List</a> --}}
+                    <a class="collapse-item" href="{{ route('users.categories') }}">Categories</a>
+                    {{-- <a class="collapse-item" href="{{ route('users.import') }}">Import Data</a> --}}
+                </div>
+            </div>
+        </li>
+    @endcan
     @can('proposal-list')
         <li class="nav-item {{ request()->routeIs('users.proposals') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('users.proposals') }}">
