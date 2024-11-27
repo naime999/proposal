@@ -199,6 +199,7 @@
     @include('proposals.add-section-modal')
     @include('proposals.add-signature-modal')
     @include('common.cropper_model')
+    @include('proposals.save-temp-modal')
 @endsection
 
 @section('scripts')
@@ -207,6 +208,7 @@
 <script src="{{ asset('admin/vendor/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ asset('admin/vendor/signature_pad/js/signature_pad.js') }}"></script>
 <script src="{{ asset('admin/vendor/cropper/cropper.js') }}"></script>
+@include('common.alert_js')
 <script>
 CKEDITOR.replace('editor');
 $('.builder').ready(function(){

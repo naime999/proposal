@@ -75,6 +75,7 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function(){
     Route::get('/proposal/load/{slug}', [ProposalController::class, 'loadData'])->name('proposal.load');
     Route::post('/proposal/update', [ProposalController::class, 'updateData'])->name('proposal.update');
     Route::post('/proposal/send', [ProposalController::class, 'sendProposal'])->name('proposal.send');
+    Route::post('/proposal/save/temp', [ProposalController::class, 'saveTempProposal'])->name('proposal.save.template');
 
     // ------------- Template
     // Route::get('/template', [ProposalController::class, 'index'])->name('template');

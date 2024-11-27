@@ -160,5 +160,9 @@ function base64ToFile(base64String, fileName) {
     return new File([u8arr], fileName, { type: mime });
 }
 
+function saveAsTemp(data){
+    $('#tempModal').modal('show');
+}
+
 
 </script>

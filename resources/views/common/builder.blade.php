@@ -25,15 +25,15 @@
                 </div>
             @endcan
             @can('proposal-create', 'proposal-edit')
-                <button class="btn btn-sm btn-primary" type="submit" onclick="saveData(this)"
-                    data-id="{{ $proposal->id }}"><i class="fas fa-save pr-2"></i>Save</button>
+                <button class="btn btn-sm btn-primary mr-2" type="submit" onclick="saveData(this)" data-id="{{ $proposal->id }}"><i class="fas fa-save pr-2"></i>Save</button>
             @endcan
             @can('proposal-create', 'proposal-edit')
-                <button class="btn btn-sm btn-primary ml-2" type="submit" onclick="sendData(this)"
-                    data-id="{{ $proposal->id }}"><i class="fas fa-solid fa-envelope pr-2"></i>Send</button>
+                <button class="btn btn-sm btn-primary mr-2" type="submit" onclick="sendData(this)" data-id="{{ $proposal->id }}"><i class="fas fa-solid fa-envelope pr-2"></i>Send</button>
             @endcan
         @endif
-        <a class="btn btn-sm btn-primary ml-2" href="{{ url()->previous() }}"><i
-                class="fas fa-arrow-left pr-2"></i>back</a>
+        @can('proposal-create', 'proposal-edit')
+            <button class="btn btn-sm btn-primary mr-2" type="submit" onclick="saveAsTemp(this)" data-id="{{ $proposal->id }}"><i class="fas fa-table-list pr-2"></i>Save as template</button>
+        @endcan
+        <a class="btn btn-sm btn-primary" href="{{ route('users.proposals') }}"><i class="fas fa-arrow-left pr-2"></i>back</a>
     </div>
 </nav>

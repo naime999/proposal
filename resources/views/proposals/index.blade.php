@@ -25,7 +25,6 @@
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">All Proposal</h6>
-
             </div>
             <div class="card-body table-responsive">
                 <table id="proposalTable" class="table table-bordered table-striped">
@@ -88,6 +87,7 @@
         html += '</div>';
         return html;
     }
+
     function showDatatable(){
         var devisData = $('#proposalTable').DataTable({
             bAutoWidth: false,
@@ -99,14 +99,14 @@
                 method: "GET",
                 data: function (d) {
                     d._token = "{{ csrf_token() }}";
-                }
+                },
             },
             columnDefs: [
                 {width: '5%', className: 'text-center', targets: [0] },
                 {className: 'text-center', targets: [3] },
                 {width: '5%', className: 'text-center', targets: [4] },
             ],
-             columns: [
+            columns: [
                 {
                     className: "dt-control",
                     orderable: false,
@@ -124,6 +124,10 @@
                 emptyTable: '<div class="py-4 border-1">No available proposal</div>'
             },
         });
+
+        // var customFilter = '<label class="ml-2">aaaa: <select id="statusFilter" class="form-control form-control-sm" name="" style="min-width: 200px;"><option value="">All Statuses</option><option value="approved">Approved</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select></label>';
+
+        // $('.dataTables_filter').append(customFilter);
 
         $('#proposalTable tbody').on('click', 'td.dt-control', function () {
             var tr = $(this).closest('tr');

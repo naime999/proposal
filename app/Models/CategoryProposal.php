@@ -18,5 +18,9 @@ class CategoryProposal extends Authenticatable
     {
         return $this->hasOne(Proposal::class, 'id', 'proposal_id');
     }
+    public function category()
+    {
+        return $this->hasOne(Category::class, 'id', 'category_id');
+    }
 
 }

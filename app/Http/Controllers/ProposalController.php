@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Proposal;
+use App\Models\Category;
+use App\Models\CategoryProposal;
 use App\Models\ProposalSection;
 use App\Models\ProposalSignature;
 use App\Exports\UsersExport;
@@ -121,7 +123,9 @@ class ProposalController extends Controller
     public function showProposal(Request $request)
     {
         $proposal = Proposal::where('slug', $request->slug)->with('sections', 'adminSignature', 'clientSignature', 'client', 'creator')->first();
-        return view('proposals.add', compact('proposal'));
+        $categories = Category::get();
+        $addedCategories = CategoryProposal::where('proposal_id', $proposal->id)->with('proposal', 'category')->get();
+        return view('proposals.add', compact('proposal', 'categories', 'addedCategories'));
     }
 
     public function loadData(Request $request)
@@ -499,6 +503,28 @@ class ProposalController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to send proposal email. ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function saveTempProposal(Request $request)
+    {
+        $this->validate($request, [
+            'category_id' => 'required',
+        ]);
+
+        $categoryProposal = CategoryProposal::where('category_id', $request->category_id)->where('proposal_id', $request->proposal_id)->first();
+
+        if($categoryProposal){
+            return redirect()->back()->with('warning', 'This category already has been add this template.');
+        }else{
+            $template = new CategoryProposal();
+            $template->category_id = $request->category_id;
+            $template->proposal_id = $request->proposal_id;
+            if($template->save()){
+                return redirect()->back()->with('success', 'Template create successful.');
+            }else{
+                return redirect()->back()->with('error', 'Template creating failed.');
+            }
         }
     }
 
