@@ -144,5 +144,52 @@
         });
     }
     showDatatable();
+
+    function deleteProposal(data){
+        var proId = $(data).attr('data-id');
+        swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this proposal",
+            icon: "info",
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Delete`,
+        }).then((result) => {
+            if (result.value == true) {
+                $.ajax({
+                    url: "{{ route('users.proposal.delete') }}",
+                    method: "POST",
+                    data: {
+                        id: proId,
+                        "_token": "{{ csrf_token() }}"
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log(response);
+                        $('#proposalTable').DataTable().ajax.reload();
+                        Swal.fire({
+                            icon: response.status,
+                            title: 'Proposal deleted!',
+                            text: response.message,
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            timer: 1500
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        $('#proposalTable').DataTable().ajax.reload();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'An unexpected error occurred. Please try again later.',
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            timer: 1500
+                        });
+                    }
+                });
+            }
+        });
+    }
 </script>
 @endsection

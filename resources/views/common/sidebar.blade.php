@@ -45,7 +45,7 @@
             <div id="templteDropDown" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Template Settings</h6>
-                    {{-- <a class="collapse-item" href="{{ route('users.index') }}">List</a> --}}
+                    <a class="collapse-item" href="{{ route('users.template') }}">View Template</a>
                     <a class="collapse-item" href="{{ route('users.categories') }}">Categories</a>
                     {{-- <a class="collapse-item" href="{{ route('users.import') }}">Import Data</a> --}}
                 </div>

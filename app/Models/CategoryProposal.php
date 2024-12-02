@@ -16,7 +16,7 @@ class CategoryProposal extends Authenticatable
 
     public function proposal()
     {
-        return $this->hasOne(Proposal::class, 'id', 'proposal_id');
+        return $this->hasOne(Proposal::class, 'id', 'proposal_id')->where('user_id', Auth()->user()->id)->with('sections');
     }
     public function category()
     {

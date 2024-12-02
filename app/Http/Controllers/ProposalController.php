@@ -71,14 +71,21 @@ class ProposalController extends Controller
                 })
                 ->addColumn('action', function ($list) {
                     // return "";
-                    return '<a href="javascript:;" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                    <i class="text-primary ti ti-dots-vertical"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end m-0 p-0">
-                        <li><a href="javascript:;" class="dropdown-item py-2"><i class="fas fa-list pr-2"></i> Details</a></li>
-                        <div class="dropdown-divider m-0"></div>
-                        <li><a href="'.route('users.proposal.show', $list->slug).'" class="dropdown-item py-2 text-primary delete-record"><i class="fas fa-eye pr-2"></i> View</a></li>
-                    </ul>
-                    </div>';
+                    $btnHtml = "";
+                    $btnHtml .= '<a href="javascript:;" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">';
+                    $btnHtml .= '<i class="text-primary ti ti-dots-vertical"></i></a>';
+                    $btnHtml .= '<ul class="dropdown-menu dropdown-menu-end m-0 p-0">';
+                    $btnHtml .= '    <li><a href="javascript:;" class="dropdown-item py-2"><i class="fas fa-list pr-2"></i> Details</a></li>';
+                    $btnHtml .= '    <div class="dropdown-divider m-0"></div>';
+                    $btnHtml .= '    <li>';
+                    $btnHtml .= '<a href="'.route('users.proposal.show', $list->slug).'" class="dropdown-item py-2 text-primary delete-record"><i class="fas fa-eye pr-2"></i> View</a>';
+                    $btnHtml .= '</li>';
+                    if($list->status == 0){
+                    $btnHtml .= '<li><button onClick="deleteProposal(this)" data-id="'.$list->id.'" class="dropdown-item py-2 text-danger"><i class="fas fa-trash pr-2"></i> Delete</button></li>';
+                    }
+                    $btnHtml .= '</ul>';
+                    $btnHtml .= '</div>';
+                    return $btnHtml;
                 })
                 ->addIndexColumn()
                 ->rawColumns(['status', 'image', 'action'])
@@ -100,9 +107,10 @@ class ProposalController extends Controller
 
         $this->validate($request, [
             'client_id' => 'required',
-            'title' => 'required|max:500',
+            'title' => 'required|max:500|unique:proposals,title',
         ],[
             "client_id.required" => "The client field is required",
+            'title.unique' => 'The title must be unique',
         ]);
 
         $newProposal = new Proposal();
@@ -242,7 +250,7 @@ class ProposalController extends Controller
             $baseImage      = $request->cover;
             $base64_str     = substr($baseImage, strpos($baseImage, ",") + 1);
             $image          = base64_decode($base64_str);
-            $image_name     = $request->proposal_id . "-" . time() . ".png";
+            $image_name     = "cover-" . time() . ".png";
             $location       = 'uploads/proposal/';
             if (!file_exists($location)) {
                 mkdir('uploads/proposal/');
@@ -255,7 +263,7 @@ class ProposalController extends Controller
             $baseImage      = $request->logo;
             $base64_str     = substr($baseImage, strpos($baseImage, ",") + 1);
             $image          = base64_decode($base64_str);
-            $image_name     = $request->proposal_id . "-logo-" . time() . ".png";
+            $image_name     = "logo-" . time() . ".png";
             $location       = 'uploads/proposal/';
             if (!file_exists($location)) {
                 mkdir('uploads/proposal/');
@@ -273,6 +281,51 @@ class ProposalController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Proposal updated failed'
+            ]);
+        }
+    }
+
+    public function deleteData(Request $request)
+    {
+
+        $proposal =  Proposal::where('id', $request->id)->with('sections', 'adminSignature', 'clientSignature')->first();
+        if($proposal){
+            if($proposal->client_signature == null){
+                // return $proposal;
+                $sec_total = 0;
+                $sec_delete = 0;
+                $sec_delete_failed = 0;
+                foreach($proposal->sections as $section){
+                    $sec_total++;
+                    if($section->delete()){
+                        $sec_delete++;
+                    }else{
+                        $sec_delete_failed++;
+                    }
+                }
+                @unlink($proposal->cover);
+                @unlink($proposal->logo);
+                if($proposal->delete()){
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Delete proposal with sections ('.$sec_total.' of '.$sec_delete.' failed '.$sec_delete_failed.') successfully',
+                    ]);
+                }else{
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Delete proposal failed'
+                    ]);
+                }
+            }else{
+                return response()->json([
+                    'status' => 'info',
+                    'message' => 'This proposal is not deleted',
+                ]);
+            }
+        }else{
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Proposal is not found',
             ]);
         }
     }

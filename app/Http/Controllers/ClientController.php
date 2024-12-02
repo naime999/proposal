@@ -219,7 +219,7 @@ class ClientController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to delete client.'], 500);
+            return response()->json(['error' => false, 'message' => 'Failed to delete client.'], 500);
         }
 
     }
