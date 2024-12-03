@@ -108,7 +108,7 @@
                                                 }
                                             html += '</div>';
                                             html += '<div class="text-right m-2 position-absolute bottom-0 end-0">';
-                                                html += '<button class="btn btn-sm btn-info mr-2" data-id = "'+item.id+'" onClick="useTo(this)">Use to</button>';
+                                                html += '<button class="btn btn-sm btn-info mr-2" data-id = "'+item.id+'" onClick="useTo(this)">Apply</button>';
                                                 html += '<a href="'+viewUrl+'" class="btn btn-sm btn-info" ><i class="fas fa-eye pr-1"></i> View</a>';
                                             html += '</div>';
                                         html += '</div>';
